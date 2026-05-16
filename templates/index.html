@@ -26,44 +26,53 @@
             <button onclick="currentPeriod = '6mo'; loadStock()">6M</button>
             <button onclick="currentPeriod = '1y'; loadStock()">1Y</button>
         </div>
-        <div id="prediction">
-        </div>
+        <div id="stock-info"></div>
+        <div id="prediction"></div>
         <div id="chart"></div>
         <script>
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
             let currentPeriod = '1mo';
+            function getStockInfo() {
+                fetch(`/api/info/${currentTicker}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const change = (((data.currentPrice - data.previousClose)/data.previousClose) * 100).toFixed(2)
+                        document.getElementById('stock-info').innerText = `${currentTicker} Current Price: "$${data.currentPrice} Change: ${change}%`
+                    })
+            }
             function getPrediction() {
-            fetch(`/api/predict/${currentTicker}`)
-                .then(response => response.json())
-                .then(data => {
-                    document.getElementById('prediction').innerText = `${data.direction} - ${data.confidence}%`
-                })
+                fetch(`/api/predict/${currentTicker}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('prediction').innerText = `${data.direction} - ${data.confidence}%`
+                    })
             }
             function loadStock() {
-            fetch(`/api/stock/${currentTicker}/${currentPeriod}`)
-                .then(response => response.json())
-                .then(data => {
-                    let trace;
-                    if (currentChartType === 'candlestick') {
-                        trace = {
-                        x: data.map(item => item.Date),
-                        open: data.map(item => item.Open),
-                        high: data.map(item => item.High),
-                        low: data.map(item => item.Low),
-                        close: data.map(item => item.Close),
-                        type: 'candlestick'
+                fetch(`/api/stock/${currentTicker}/${currentPeriod}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let trace;
+                        if (currentChartType === 'candlestick') {
+                            trace = {
+                            x: data.map(item => item.Date),
+                            open: data.map(item => item.Open),
+                            high: data.map(item => item.High),
+                            low: data.map(item => item.Low),
+                            close: data.map(item => item.Close),
+                            type: 'candlestick'
+                            }
+                        } else {
+                            trace = {
+                            x: data.map(item => item.Date),
+                            y: data.map(item => item.Close),
+                            type: `${currentChartType}`,
+                            mode: 'lines'}
                         }
-                    } else {
-                        trace = {
-                        x: data.map(item => item.Date),
-                        y: data.map(item => item.Close),
-                        type: `${currentChartType}`,
-                        mode: 'lines'}
-                    }
                     Plotly.newPlot('chart', [trace], { xaxis: { type: 'date' } })
+                    getPrediction()
+                    getStockInfo()
                 })
-            getPrediction()
             }
             setInterval(loadStock, 30 * 60 * 1000)
             loadStock()
