@@ -26,10 +26,20 @@
             <button onclick="currentPeriod = '6mo'; loadStock()">6M</button>
             <button onclick="currentPeriod = '1y'; loadStock()">1Y</button>
         </div>
+        <div id="prediction">
+        </div>
+        <div id="chart"></div>
         <script>
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
             let currentPeriod = '1mo';
+            function getPrediction() {
+            fetch(`/api/predict/${currentTicker}`)
+                .then(response => response.json())
+                .then(data => {
+                    document.getElementById('prediction').innerText = `${data.direction} - ${data.confidence}%`
+                })
+            }
             function loadStock() {
             fetch(`/api/stock/${currentTicker}/${currentPeriod}`)
                 .then(response => response.json())
@@ -53,22 +63,10 @@
                     }
                     Plotly.newPlot('chart', [trace], { xaxis: { type: 'date' } })
                 })
+            getPrediction()
             }
-        setInterval(loadStock, 30 * 60 * 1000)
-        </script>
-        <div id="chart"></div>
-        <script>
-            fetch('/api/stock/AAPL')
-                .then(response => response.json())
-                .then(data => {
-                    const trace = {
-                        x: data.map(item => item.Date),
-                        y: data.map(item => item.Close),
-                        type: 'scatter',
-                        mode: 'lines'
-                    }
-                    Plotly.newPlot('chart', [trace], {})
-                })
+            setInterval(loadStock, 30 * 60 * 1000)
+            loadStock()
         </script>
     </body>
 </html>
