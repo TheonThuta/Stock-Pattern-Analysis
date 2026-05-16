@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+    </head>
+    <body>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="currentTicker = 'AAPL'; loadStock()">AAPL</button>
+            <button onclick="currentTicker = 'TSLA'; loadStock()">TSLA</button>
+            <button onclick="currentTicker = 'NVDA'; loadStock()">NVDA</button>
+            <button onclick="currentTicker = 'MSFT'; loadStock()">MSFT</button>
+            <button onclick="currentTicker = 'GOOGL'; loadStock()">GOOGL</button>
+            <button onclick="currentTicker = 'AMZN'; loadStock()">AMZN</button>
+            <button onclick="currentTicker = 'META'; loadStock()">META</button>
+            <button onclick="currentTicker = 'AMD'; loadStock()">AMD</button>
+            <button onclick="currentTicker = 'SPY'; loadStock()">SPY</button>
+        </div>
+        <div style="display: flex; gap: 8px;">
+            <button onclick="currentChartType = 'line'; loadStock()">Line</button>
+            <button onclick="currentChartType = 'candlestick'; loadStock()">Candlestick</button>
+        </div>
+        <div style="display: flex; gap: 8px">
+            <button onclick="currentPeriod = '5d'; loadStock()">5D</button>
+            <button onclick="currentPeriod = '1mo'; loadStock()">1M</button>
+            <button onclick="currentPeriod = '3mo'; loadStock()">3M</button>
+            <button onclick="currentPeriod = '6mo'; loadStock()">6M</button>
+            <button onclick="currentPeriod = '1y'; loadStock()">1Y</button>
+        </div>
+        <script>
+            let currentTicker = 'AAPL';
+            let currentChartType = 'line';
+            let currentPeriod = '1mo';
+            function loadStock() {
+            fetch(`/api/stock/${currentTicker}/${currentPeriod}`)
+                .then(response => response.json())
+                .then(data => {
+                    let trace;
+                    if (currentChartType === 'candlestick') {
+                        trace = {
+                        x: data.map(item => item.Date),
+                        open: data.map(item => item.Open),
+                        high: data.map(item => item.High),
+                        low: data.map(item => item.Low),
+                        close: data.map(item => item.Close),
+                        type: 'candlestick'
+                        }
+                    } else {
+                        trace = {
+                        x: data.map(item => item.Date),
+                        y: data.map(item => item.Close),
+                        type: `${currentChartType}`,
+                        mode: 'lines'}
+                    }
+                    Plotly.newPlot('chart', [trace], { xaxis: { type: 'date' } })
+                })
+            }
+        setInterval(loadStock, 30 * 60 * 1000)
+        </script>
+        <div id="chart"></div>
+        <script>
+            fetch('/api/stock/AAPL')
+                .then(response => response.json())
+                .then(data => {
+                    const trace = {
+                        x: data.map(item => item.Date),
+                        y: data.map(item => item.Close),
+                        type: 'scatter',
+                        mode: 'lines'
+                    }
+                    Plotly.newPlot('chart', [trace], {})
+                })
+        </script>
+    </body>
+</html>
