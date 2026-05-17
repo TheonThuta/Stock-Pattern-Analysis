@@ -30,10 +30,22 @@
         <div id="prediction"></div>
         <div id="chart"></div>
         <div id="volume-chart"></div>
+        <div id="news-feed"></div>
         <script>
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
             let currentPeriod = '1mo';
+            function getNews() {
+                fetch(`/api/news/${currentTicker}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        let html = '';
+                        data.forEach(article => {
+                            html += `<a href="${article.url}">${article.title}</a><p>${article.source}</p>`
+                        })
+                        document.getElementById('news-feed').innerHTML = html
+                    })
+            }
             function getStockInfo() {
                 fetch(`/api/info/${currentTicker}`)
                     .then(response => response.json())
@@ -79,6 +91,7 @@
                     Plotly.newPlot('volume-chart', [trace], {})
                     getPrediction()
                     getStockInfo()
+                    getNews()
                 })
             }
             setInterval(loadStock, 30 * 60 * 1000)

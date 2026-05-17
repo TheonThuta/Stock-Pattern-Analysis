@@ -9,3 +9,15 @@ def get_stock_info(ticker):
         'currentPrice': data['currentPrice'],
         'previousClose': data['previousClose']
     }
+
+def get_stock_news(tick):
+    data = yf.Ticker(ticker=tick).news
+    stories = []
+    for i in data[:5]:
+        article = {
+            'title': i['content']['title'],
+            'url': i['content']['clickThroughUrl']['url'],
+            'source': i['content']['provider']['displayName']
+        }
+        stories.append(article)
+    return stories
