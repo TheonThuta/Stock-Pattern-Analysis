@@ -29,6 +29,7 @@
         <div id="stock-info"></div>
         <div id="prediction"></div>
         <div id="chart"></div>
+        <div id="volume-chart"></div>
         <script>
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
@@ -70,6 +71,12 @@
                             mode: 'lines'}
                         }
                     Plotly.newPlot('chart', [trace], { xaxis: { type: 'date' } })
+                    trace = {
+                        x: data.map(item => item.Date),
+                        y: data.map(item => item.Volume),
+                        type: 'bar'
+                    }
+                    Plotly.newPlot('volume-chart', [trace], {})
                     getPrediction()
                     getStockInfo()
                 })
