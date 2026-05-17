@@ -7,6 +7,6 @@ def get_prediction(ticker):
     LMA = close_price[-21:].mean().item()
     confidence_score = ((abs(SMA-LMA) / LMA) * 100)
     if SMA > LMA:
-        return {'direction': 'rise', 'confidence': round(confidence_score, 2)}
+        return {'direction': 'Rise', 'confidence': round(confidence_score, 2)}
     else:
-        return {'direction': 'fall', 'confidence': round(confidence_score, 2)}
+        return {'direction': 'Fall', 'confidence': round(confidence_score, 2)}

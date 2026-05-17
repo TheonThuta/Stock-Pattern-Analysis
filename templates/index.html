@@ -2,9 +2,11 @@
 <html>
     <head>
         <script src='https://cdn.plot.ly/plotly-latest.min.js'></script>
+        <link rel="stylesheet" href="/static/styles.css">
     </head>
     <body>
-        <div style="display: flex; gap: 8px;">
+        <div class="container">
+            <div style="display: flex; gap: 8px;">
             <button onclick="currentTicker = 'AAPL'; loadStock()">AAPL</button>
             <button onclick="currentTicker = 'TSLA'; loadStock()">TSLA</button>
             <button onclick="currentTicker = 'NVDA'; loadStock()">NVDA</button>
@@ -19,18 +21,19 @@
             <button onclick="currentChartType = 'line'; loadStock()">Line</button>
             <button onclick="currentChartType = 'candlestick'; loadStock()">Candlestick</button>
         </div>
-        <div style="display: flex; gap: 8px">
+        <h2 id="ticker-header"></h2>
+        <div id="stock-info" class="card"></div>
+        <div id="prediction" class="card"></div>
+        <div style="display: flex; gap: 10px">
             <button onclick="currentPeriod = '5d'; loadStock()">5D</button>
             <button onclick="currentPeriod = '1mo'; loadStock()">1M</button>
             <button onclick="currentPeriod = '3mo'; loadStock()">3M</button>
             <button onclick="currentPeriod = '6mo'; loadStock()">6M</button>
             <button onclick="currentPeriod = '1y'; loadStock()">1Y</button>
         </div>
-        <div id="stock-info"></div>
-        <div id="prediction"></div>
         <div id="chart"></div>
         <div id="volume-chart"></div>
-        <div id="news-feed"></div>
+        <div id="news-feed" class="news-widget"></div>
         <script>
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
@@ -39,9 +42,9 @@
                 fetch(`/api/news/${currentTicker}`)
                     .then(response => response.json())
                     .then(data => {
-                        let html = '';
+                        let html = '<h3>Top Stories</h3>';
                         data.forEach(article => {
-                            html += `<a href="${article.url}">${article.title}</a><p>${article.source}</p>`
+                        html += `<img src="${article.image}" width="170"><br><a href="${article.url}" class="news-title">${article.title}</a><p>${article.source}</p>`
                         })
                         document.getElementById('news-feed').innerHTML = html
                     })
@@ -50,15 +53,26 @@
                 fetch(`/api/info/${currentTicker}`)
                     .then(response => response.json())
                     .then(data => {
-                        const change = (((data.currentPrice - data.previousClose)/data.previousClose) * 100).toFixed(2)
-                        document.getElementById('stock-info').innerText = `${currentTicker} Current Price: "$${data.currentPrice} Change: ${change}%`
+                        const change = (((data.currentPrice - data.previousClose)/data.previousClose) * 100).toFixed(2);
+                        const changeColor = change > 0 ? '#3fb950' : '#f85149';
+                        const changeIcon = change > 0 ? '▲' : '▼';
+                        document.getElementById('stock-info').innerHTML = `
+                            <p style="color:#8b949e; margin:0; font-size:12px;">CURRENT PRICE</p>
+                            <span style="font-size:28px; font-weight:600;">$${data.currentPrice}</span>
+                            <p style="color:#8b949e; margin:8px 0 0 0; font-size:12px;">DAILY CHANGE</p>
+                            <span style="font-size:18px; color:${changeColor};">${changeIcon} ${change}%</span>`
+                        document.getElementById('ticker-header').innerText = `${currentTicker}`
                     })
             }
             function getPrediction() {
                 fetch(`/api/predict/${currentTicker}`)
                     .then(response => response.json())
                     .then(data => {
-                        document.getElementById('prediction').innerText = `${data.direction} - ${data.confidence}%`
+                        document.getElementById('prediction').innerHTML = `
+                            <p style="color:#8b949e; margin:0; font-size:12px;">PREDICTION</p>
+                            <span style="font-size:28px; font-weight:600;">${data.direction}</span>
+                            <p style="color:#8b949e; margin:8px 0 0 0; font-size:12px;">CONFIDENCE</p>
+                            <span style="font-size:18px;">${data.confidence}%</span>`
                     })
             }
             function loadStock() {
@@ -82,13 +96,23 @@
                             type: `${currentChartType}`,
                             mode: 'lines'}
                         }
-                    Plotly.newPlot('chart', [trace], { xaxis: { type: 'date' } })
-                    trace = {
+                    volumeTrace = {
                         x: data.map(item => item.Date),
                         y: data.map(item => item.Volume),
-                        type: 'bar'
+                        marker: {color: '#58a6ff' },
+                        yaxis: 'y2',
+                        type: 'bar',
+                        showlegend: false
                     }
-                    Plotly.newPlot('volume-chart', [trace], {})
+                    Plotly.newPlot('chart', [trace, volumeTrace], {
+                        paper_bgcolor: '#0d1117',
+                        plot_bgcolor: '#0d1117',
+                        grid: { rows: 2, columns: 1, pattern: 'coupled'},
+                        font: { color: '#e6edf3' },
+                        xaxis: { type: 'date', gridcolor: '#30363d' },
+                        yaxis: { gridcolor: '#30363d' },
+                        yaxis2: { gridcolor: '#30363d' }
+                    })
                     getPrediction()
                     getStockInfo()
                     getNews()
@@ -97,5 +121,6 @@
             setInterval(loadStock, 30 * 60 * 1000)
             loadStock()
         </script>
+        </div>
     </body>
 </html>

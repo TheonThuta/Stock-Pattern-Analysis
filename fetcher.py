@@ -17,7 +17,8 @@ def get_stock_news(tick):
         article = {
             'title': i['content']['title'],
             'url': i['content']['clickThroughUrl']['url'],
-            'source': i['content']['provider']['displayName']
+            'source': i['content']['provider']['displayName'],
+            'image': i['content']['thumbnail']['originalUrl']
         }
         stories.append(article)
     return stories
