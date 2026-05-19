@@ -17,10 +17,6 @@
             <button onclick="currentTicker = 'AMD'; loadStock()">AMD</button>
             <button onclick="currentTicker = 'SPY'; loadStock()">SPY</button>
         </div>
-        <div style="display: flex; gap: 8px;">
-            <button onclick="currentChartType = 'line'; loadStock()">Line</button>
-            <button onclick="currentChartType = 'candlestick'; loadStock()">Candlestick</button>
-        </div>
         <h2 id="ticker-header"></h2>
         <div id="stock-info" class="card"></div>
         <div id="prediction" class="card"></div>
@@ -32,6 +28,11 @@
             <button onclick="currentPeriod = '3mo'; loadStock()">3M</button>
             <button onclick="currentPeriod = '6mo'; loadStock()">6M</button>
             <button onclick="currentPeriod = '1y'; loadStock()">1Y</button>
+            <select onchange="currentChartType = this.value; loadStock()">
+                <option value="line">Line</option>
+                <option value="candlestick">Candlestick</option>
+                <option value="mountain">Mountain</option>
+            </select>
         </div>
         <div id="chart"></div>
         <div id="volume-chart"></div>
@@ -110,6 +111,13 @@
                             close: data.map(item => item.Close),
                             type: 'candlestick'
                             }
+                        } else if (currentChartType === 'mountain') {
+                            trace = {
+                            x: data.map(item => item.Date),
+                            y: data.map(item => item.Close),
+                            fill: 'tozeroy',
+                            type: 'scatter',
+                            mode: 'lines'}
                         } else {
                             trace = {
                             x: data.map(item => item.Date),
