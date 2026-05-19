@@ -11,10 +11,12 @@ def get_stock_info(ticker):
     }
 
 def get_stock_news(tick):
-    data = yf.Ticker(ticker=tick).news
+    data = yf.Ticker(tick).news
     stories = []
     for i in data[:5]:
         if not i['content']['clickThroughUrl']:
+            continue
+        if not i['content']['clickThroughUrl'] or not i['content']['thumbnail']:
             continue
         article = {
             'title': i['content']['title'],

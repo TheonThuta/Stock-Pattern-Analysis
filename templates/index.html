@@ -64,7 +64,7 @@
                 fetch(`/api/news/${currentTicker}`)
                     .then(response => response.json())
                     .then(data => {
-                        let html = '<h3>Top Stories</h3>';
+                        let html = `<h3>Top Stories about ${currentTicker}</h3>`;
                         data.forEach(article => {
                         html += `<img src="${article.image}" width="170"><br><a href="${article.url}" class="news-title">${article.title}</a><p>${article.source}</p>`
                         })
