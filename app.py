@@ -1,5 +1,5 @@
 from flask import Flask, render_template, jsonify
-from fetcher import get_stock_data, get_stock_info, get_stock_news
+from fetcher import get_stock_data, get_stock_info, get_stock_news, get_indicators
 from predictor import get_prediction
 
 app = Flask(__name__)
@@ -24,6 +24,9 @@ def info(ticker):
 def news(ticker):
     return jsonify(get_stock_news(ticker))
 
+@app.route('/api/indicators/<ticker>')
+def indicators(ticker):
+    return jsonify(get_indicators(ticker))
 
 if __name__ == '__main__':
     app.run()

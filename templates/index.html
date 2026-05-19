@@ -24,6 +24,8 @@
         <h2 id="ticker-header"></h2>
         <div id="stock-info" class="card"></div>
         <div id="prediction" class="card"></div>
+        <div id="rsi-card" class="card"></div>
+        <div id="macd-card" class="card"></div>
         <div style="display: flex; gap: 10px">
             <button onclick="currentPeriod = '5d'; loadStock()">5D</button>
             <button onclick="currentPeriod = '1mo'; loadStock()">1M</button>
@@ -38,6 +40,25 @@
             let currentTicker = 'AAPL';
             let currentChartType = 'line';
             let currentPeriod = '1mo';
+            function getIndicators() {
+                fetch(`/api/indicators/${currentTicker}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        const rsiColor = data.RSI < 30? '#3fb950' : data.RSI > 70 ? '#f85149' : '#e6edf3'
+                        document.getElementById('rsi-card').innerHTML =
+                            `<p style="color:#8b949e; margin:0; font-size:12px;">RSI</p>
+                            <span style="font-size:28px; font-weight:600; color:${rsiColor}">${data.RSI}</span>`
+                        document.getElementById('macd-card').innerHTML = 
+                            `<div>
+                                <p style="color:#8b949e; margin:0; font-size:12px;">MACD</p>
+                                <span style="font-size:28px; font-weight:600;">${data.MACD}</span>
+                            </div>
+                            <div>
+                                <p style="color:#8b949e; margin:0; font-size:12px;">SIGNAL</p>
+                                <span style="font-size:18px; font-weight:600;">${data.signal}</span>
+                            </div>`
+                    })
+            }
             function getNews() {
                 fetch(`/api/news/${currentTicker}`)
                     .then(response => response.json())
@@ -108,14 +129,16 @@
                         paper_bgcolor: '#0d1117',
                         plot_bgcolor: '#0d1117',
                         grid: { rows: 2, columns: 1, pattern: 'coupled'},
+                        showlegend: false,
                         font: { color: '#e6edf3' },
                         xaxis: { type: 'date', gridcolor: '#30363d' },
                         yaxis: { gridcolor: '#30363d' },
-                        yaxis2: { gridcolor: '#30363d' }
+                        yaxis2: { gridcolor: '#30363d' },
                     })
                     getPrediction()
                     getStockInfo()
                     getNews()
+                    getIndicators()
                 })
             }
             setInterval(loadStock, 30 * 60 * 1000)
